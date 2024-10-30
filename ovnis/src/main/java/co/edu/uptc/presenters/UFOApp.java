@@ -2,6 +2,8 @@ package co.edu.uptc.presenters;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import co.edu.uptc.models.UFO;
 //import co.edu.uptc.views.MainUFOWindow;
@@ -10,14 +12,17 @@ import co.edu.uptc.views.UFOFrame;
 public class UFOApp {
     private ArrayList<UFO> ufos;
     private UFOFrame ufoView;
+    private Timer timer;
+    private int spawnTime;
 
     public UFOApp(){
         ufos = new ArrayList<>();
-        ufoView = new UFOFrame(ufos, e -> updateUFOs());
+        ufoView = new UFOFrame(ufos, e -> updateUFOs(), e -> updateSpawnTime());
         
         for (int i = 0; i < 10; i++) {
             ufos.add(new UFO());
         }
+        spawnTime = 1000;
         addTimer();
     }
 
@@ -31,13 +36,31 @@ public class UFOApp {
         ufoView.updateUfos(ufos);
     }
 
-    public void addTimer(){
-        new Timer(10, e -> {
-            for (UFO ufo : ufos) {
-                ufo.move();
+    private void updateSpawnTime(){
+        spawnTime = ufoView.getSpawnTime();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run(){
+                for (UFO ufo : ufos) {
+                    ufo.move();
+                }
+                ufoView.updateUfos(ufos);
             }
-            ufoView.repaint();
-        }).start();
+
+        }, 0, spawnTime);
+    }
+
+    public void addTimer(){
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run(){
+                for (UFO ufo : ufos) {
+                    ufo.move();
+                }
+                ufoView.updateUfos(ufos);
+            }
+        }, 0, 10);
         ufoView.setVisible(true);
     }
     
