@@ -29,13 +29,13 @@ public class UFOFrame extends JFrame{
         ufoCount = new JTextField("10", 5);
         controlPanel.add(ufoCount);
 
-        controlPanel.add(new JLabel("tiempo de aparicion (ms): "));
-        ufoSpawnTime = new JTextField("1000", 5);
-        controlPanel.add(ufoSpawnTime);
-
         JButton uptadeButton = new JButton("actualizar");
         uptadeButton.addActionListener(updateListener);
         controlPanel.add(uptadeButton);
+
+        controlPanel.add(new JLabel("tiempo de aparicion (ms): "));
+        ufoSpawnTime = new JTextField("1000", 5);
+        controlPanel.add(ufoSpawnTime);
 
         JButton spawnTimeButton = new JButton("Configurar tiempo");
         spawnTimeButton.addActionListener(updateListener);

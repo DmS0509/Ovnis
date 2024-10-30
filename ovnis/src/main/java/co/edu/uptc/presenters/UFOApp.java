@@ -6,7 +6,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import co.edu.uptc.models.UFO;
-//import co.edu.uptc.views.MainUFOWindow;
 import co.edu.uptc.views.UFOFrame;
 
 public class UFOApp {
@@ -14,13 +13,15 @@ public class UFOApp {
     private UFOFrame ufoView;
     private Timer timer;
     private int spawnTime;
+    private int maxCoordenateX = 800;
+    private int maxCoordenateY = 600;
 
     public UFOApp(){
         ufos = new ArrayList<>();
         ufoView = new UFOFrame(ufos, e -> updateUFOs(), e -> updateSpawnTime());
         
         for (int i = 0; i < 10; i++) {
-            ufos.add(new UFO());
+            ufos.add(new UFO(maxCoordenateX, maxCoordenateY));
         }
         spawnTime = 1000;
         addTimer();
@@ -31,7 +32,7 @@ public class UFOApp {
         if (numOfUFOs < 0) return; // Manejo de error
         ufos.clear();
         for (int i = 0; i < numOfUFOs; i++) {
-            ufos.add(new UFO());
+            ufos.add(new UFO(maxCoordenateX, maxCoordenateY));
         }
         ufoView.updateUfos(ufos);
     }
