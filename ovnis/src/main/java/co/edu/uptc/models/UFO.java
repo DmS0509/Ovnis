@@ -1,20 +1,39 @@
 package co.edu.uptc.models;
 
-public class UFO {
+public class UFO extends Thread{
     
     private int coordenateX;
     private int coordenateY;
     private int maxCoordenateX;
     private int maxCoordenateY;
+    private boolean running;
 
     public UFO(int maxCoordenateX, int maxCoordenateY){
-        coordenateX = (int)(Math.random() * 800);
-        coordenateY = (int)(Math.random() * 600);
+        this.maxCoordenateX = maxCoordenateX;
+        this.maxCoordenateY = maxCoordenateY;
+        spawn();
+    }
+
+    @Override
+    public void run(){
+        running = true;
+        while (running) {
+            move();
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                running = false;
+            }
+        }
     }
 
     public void move(){
         coordenateX += (Math.random() * 10 - 5);
         coordenateY += (Math.random() * 10 - 5);
+        if(coordenateX < 0) coordenateX = 0;
+        if(coordenateX > maxCoordenateX) coordenateX = maxCoordenateX;
+        if(coordenateY < 0) coordenateY = 0;
+        if(coordenateY > maxCoordenateY) coordenateY = maxCoordenateY;
     }
 
     public void spawn(){
@@ -28,6 +47,10 @@ public class UFO {
 
     public int getCoordenateY() {
         return coordenateY;
+    }
+
+    public void stopMoving(){
+        running = false;
     }
 
 }

@@ -21,7 +21,9 @@ public class UFOApp {
         ufoView = new UFOFrame(ufos, e -> updateUFOs(), e -> updateSpawnTime());
         
         for (int i = 0; i < 10; i++) {
-            ufos.add(new UFO(maxCoordenateX, maxCoordenateY));
+            UFO ufo = new UFO(maxCoordenateX, maxCoordenateY);
+            ufos.add(ufo);
+            ufo.start();
         }
         spawnTime = 1000;
         addTimer();
@@ -30,9 +32,14 @@ public class UFOApp {
     private void updateUFOs() {
         int numOfUFOs = ufoView.getNumberOfUfos();
         if (numOfUFOs < 0) return; // Manejo de error
+        for (UFO ufo : ufos) {
+            ufo.stopMoving();
+        }
         ufos.clear();
         for (int i = 0; i < numOfUFOs; i++) {
-            ufos.add(new UFO(maxCoordenateX, maxCoordenateY));
+            UFO ufo = new UFO(maxCoordenateX, maxCoordenateY);
+            ufos.add(ufo);
+            ufo.start();
         }
         ufoView.updateUfos(ufos);
     }
