@@ -28,12 +28,17 @@ public class UFO extends Thread{
     }
 
     public void move(){
-        coordenateX += (Math.random() * 10 - 5);
-        coordenateY += (Math.random() * 10 - 5);
+        int deltaX = (int) (Math.random() * 10 - 5);
+        int deltaY = (int) (Math.random() * 10 - 5);
+
+        coordenateX += deltaX;
+        coordenateY += deltaY;
+        
         if(coordenateX < 0) coordenateX = 0;
         if(coordenateX > maxCoordenateX) coordenateX = maxCoordenateX;
         if(coordenateY < 0) coordenateY = 0;
         if(coordenateY > maxCoordenateY) coordenateY = maxCoordenateY;
+
     }
 
     public void spawn(){
