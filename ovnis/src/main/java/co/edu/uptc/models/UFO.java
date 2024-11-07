@@ -17,7 +17,7 @@ public class UFO extends Thread{
     public UFO(int maxCoordenateX, int maxCoordenateY, String imagePath){
         this.maxCoordenateX = maxCoordenateX;
         this.maxCoordenateY = maxCoordenateY;
-        this.image = loadImage(imagePath);
+        this.image = loadImage(imagePath, 50, 50);
         this.speed = 50;
         spawn();
         setRandomDirection();
@@ -62,13 +62,16 @@ public class UFO extends Thread{
 
     }
 
-    private Image loadImage(String path){
+    private Image loadImage(String path, int width, int height){
         ClassLoader classLoader = getClass().getClassLoader();
         URL resource = classLoader.getResource(path);
         if (resource != null) {
-            return new ImageIcon(resource).getImage();
+            ImageIcon icon = new ImageIcon(resource);
+            Image originalImage = icon.getImage();
+            Image resizedImage = originalImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            return resizedImage;
         }else {
-            System.err.println("F: " + path);
+            System.err.println("no hay imagen wey ; ;: " + path);
             return null;
         }
     }
@@ -108,7 +111,7 @@ public class UFO extends Thread{
     }
 
     public void setImage(String imagePath){
-        this.image = loadImage(imagePath);
+        this.image = loadImage(imagePath, 50, 50);
     }
 
 }

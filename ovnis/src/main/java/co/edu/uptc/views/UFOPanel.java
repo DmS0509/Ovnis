@@ -3,15 +3,21 @@ package co.edu.uptc.views;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.io.File;
+import java.io.IOException;
 //import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import co.edu.uptc.models.UFO;
 
 public class UFOPanel extends JPanel{
     
     private ArrayList<UFO> ufos;
+    private Image ufoImage;
    // private BufferedImage ufoImage;
+
 
     public UFOPanel(ArrayList<UFO> ufos){
         this.ufos = ufos;
@@ -41,4 +47,26 @@ public class UFOPanel extends JPanel{
             }
         }
     }
+        
+
+    public void getImage(){
+        try {
+            ufoImage = ImageIO.read(new File("Images/Ovni1.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+/* 
+    @Override
+    protected void paintComponent(Graphics g){
+        super.paintComponent(g);
+        if (ufoImage != null) {
+            int width = 40;
+            int height = 30;
+            g.drawImage(ufoImage.getScaledInstance(width, height, Image.SCALE_SMOOTH), 10, 8, this);
+        }else {
+            System.out.println("weeey no carga :'v");
+        }
+    }
+        */
 }

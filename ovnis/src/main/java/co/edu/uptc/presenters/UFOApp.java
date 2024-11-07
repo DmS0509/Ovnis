@@ -17,7 +17,7 @@ public class UFOApp {
     private int spawnTime;
     private int maxCoordenateX = 800;
     private int maxCoordenateY = 600;
-    private String ufoImagePath = "ovnis\\src\\main\\resources\\Ovni1.png";
+    private String ufoImagePath = "Images/Ovni1.png";
 
     public UFOApp(){
         ufos = new ArrayList<>();
