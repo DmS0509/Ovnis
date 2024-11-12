@@ -1,72 +1,119 @@
 package co.edu.uptc.views;
 
 import java.awt.BorderLayout;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
+import javax.swing.SwingUtilities;
 import co.edu.uptc.models.UFO;
 
-public class UFOFrame extends JFrame{
-    
-    private UFOPanel ufoPanel;
-    private JTextField ufoCount;
-    private JTextField ufoSpawnTime;
+public class UFOFrame extends JFrame {
 
-    public UFOFrame(ArrayList<UFO> ufos, ActionListener updateListener, ActionListener spawListener){
-        ufoPanel = new UFOPanel(ufos);
+    private UFOPanel ufoPanel;
+    private UFO selectedUFO;
+    private UFOControlPanel controlPanel;
+    private ArrayList<Point> trajectory;
+    private ArrayList<UFO> ufos;
+
+    public UFOFrame(ArrayList<UFO> ufos, ActionListener updateListener, ActionListener spawListener,
+            ActionListener speedListener, ActionListener imagListener) {
+        this.ufos = ufos;
+        ufoPanel = new UFOPanel(ufos, "/Images/background.jpg");
+        trajectory = new ArrayList<>();
         setLayout(new BorderLayout());
         add(ufoPanel, BorderLayout.CENTER);
 
-        JPanel controlPanel = new JPanel();
-        controlPanel.add(new JLabel("Numero de ovnis"));
-        ufoCount = new JTextField("10", 5);
-        controlPanel.add(ufoCount);
+        controlPanel = new UFOControlPanel(updateListener, spawListener, speedListener, imagListener, e -> updateView(), ufos);
+        add(controlPanel, BorderLayout.EAST);
 
-        JButton uptadeButton = new JButton("actualizar");
-        uptadeButton.addActionListener(updateListener);
-        controlPanel.add(uptadeButton);
+        ufoPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    for (UFO ufo : ufos) {
+                        Image image = ufo.getImage();
+                        int imageWidth = image.getWidth(ufoPanel);
+                        int imageHeight = image.getHeight(ufoPanel);
+                        Rectangle ufoBounds = new Rectangle(ufo.getCoordenateX(), ufo.getCoordenateY(), imageWidth,
+                                imageHeight);
+                        if (ufoBounds.contains(e.getPoint())) {
+                            selectedUFO = ufo;
+                            trajectory.clear();
+                            break;
+                        }
+                    }
+                }
+            }
 
-        controlPanel.add(new JLabel("tiempo de aparicion (ms): "));
-        ufoSpawnTime = new JTextField("1000", 5);
-        controlPanel.add(ufoSpawnTime);
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3 && selectedUFO != null) {
+                    trajectory.clear();
+                }
+            }
 
-        JButton spawnTimeButton = new JButton("Configurar tiempo");
-        spawnTimeButton.addActionListener(updateListener);
-        controlPanel.add(spawnTimeButton);
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3 && selectedUFO != null) {
+                    selectedUFO.setTrajectory(trajectory);
+                }
+            }
+        });
 
-        add(controlPanel, BorderLayout.SOUTH);
+        ufoPanel.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e) && selectedUFO != null) {
+                    trajectory.add(e.getPoint());
+                    ufoPanel.repaint();
+                }
+            }
+        });
+
         setTitle("UFO SIMULATION");
         pack();
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
     }
 
-    public void updateUfos(ArrayList<UFO> ufos){
-        ufoPanel.updateUFOS(ufos);
+    public void updateUfos(ArrayList<UFO> ufos) {
+        this.ufos = ufos;
+        repaint();
     }
 
-    public int getNumberOfUfos(){
-        try {
-            return Integer.parseInt(ufoCount.getText());
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "por favor ingresa un numero valido");
-            return -1;
-        }
+    public int getNumberOfUfos() {
+        return controlPanel.getNumOfUFOs();
     }
 
-    public int getSpawnTime(){
-        try {
-            return Integer.parseInt(ufoSpawnTime.getText());
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "por favor ingresa un numero valido");
-            return -1;
-        }
+    public int getSpawnTime() {
+        return controlPanel.getSpawnTime();
+    }
+
+    public int getSpeed() {
+        return controlPanel.getSpeed();
+    }
+
+    public UFO getSelecteUFO() {
+        return selectedUFO;
+    }
+
+    public void setUFOsInScreenCount(int count) {
+        controlPanel.setUFOsInScreenCount(count);
+    }
+
+    public void setUFOsCrashedCount(int count) {
+        controlPanel.setUFOsCrashedCount(count);
+    }
+
+    private void updateView() {
+        setUFOsInScreenCount(ufos.size());
+        setUFOsCrashedCount(ufos.stream().filter(UFO::isCrashed).mapToInt(UFO -> 1).sum());
     }
 }
