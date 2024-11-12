@@ -11,7 +11,10 @@ import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 
-public class UFO extends Thread {
+import co.edu.uptc.interfaces.ModelInterface;
+import co.edu.uptc.interfaces.PresenterInterface;
+
+public class UFO extends Thread implements ModelInterface {
 
     private int coordenateX, coordenateY;
     private int maxCoordenateX, maxCoordenateY;
@@ -23,7 +26,10 @@ public class UFO extends Thread {
     private ArrayList<Point> trajectory;
     private int trajectoryIndex;
     private boolean crashed;
+    private boolean reachedDestination;
     private String imagePath;
+
+    private PresenterInterface presenter;
 
     public UFO(int maxCoordenateX, int maxCoordenateY, String imagePath, int destinationInX, int destinationInY) {
         this.maxCoordenateX = maxCoordenateX;
@@ -56,16 +62,21 @@ public class UFO extends Thread {
         }
     }
 
+    @Override
+    public void setPresenter(PresenterInterface presenter) {
+        this.presenter = presenter;
+    }
+
     private boolean hasReachedDestination() {
         return Math.abs(coordenateX - destinationInX) < 5 && Math.abs(coordenateY - destinationInY) < 5;
     }
 
-    public boolean hasReachedDefaultDestination(Point destination){
+    public boolean hasReachedDefaultDestination(Point destination) {
         return Math.abs(coordenateX - destination.x) < 5 && Math.abs(coordenateY - destination.y) < 5;
     }
 
     public void move() {
-        if (!crashed) {
+        if (!crashed && !reachedDestination) {
             if (!trajectory.isEmpty()) {
                 Point nextPoint = trajectory.get(trajectoryIndex);
                 int deltaX = nextPoint.x - coordenateX;
@@ -82,25 +93,39 @@ public class UFO extends Thread {
                     }
                 }
             } else {
-                coordenateX += dx;
-                coordenateY += dy;
 
-                if (coordenateX < 0 || coordenateX > maxCoordenateX || coordenateY < 0
-                        || coordenateY > maxCoordenateY) {
-                    crashed = true;
-                    running = false;
-                }
-                validateCoordenates();
-                if (Math.random() < 0.1) {
-                    setRandomDirection();
+                if (destinationInX != -1 && destinationInY != -1) {
+                    int deltaX = destinationInX - coordenateX;
+                    int deltaY = destinationInY - coordenateY;
+                    double fraction = 0.4;
+                    coordenateX += deltaX * fraction;
+                    coordenateY += deltaY * fraction;
+
+                    if (Math.abs(deltaX) < 5 && Math.abs(deltaY) < 5) {
+                        reachedDestination = true;
+                        running = false;
+                    }
+                } else {
+                    coordenateX += dx;
+                    coordenateY += dy;
+
+                    if (coordenateX < 0 || coordenateX > maxCoordenateX || coordenateY < 0
+                            || coordenateY > maxCoordenateY) {
+                        crashed = true;
+                        running = false;
+                    }
+                    validateCoordenates();
+                    if (Math.random() < 0.1) {
+                        setRandomDirection();
+                    }
+
+                    if (hasReachedDefaultDestination(new Point(maxCoordenateX / 2, maxCoordenateY / 2))) {
+                        stopMoving();
+                    }
                 }
 
-                if (hasReachedDefaultDestination(new Point(maxCoordenateX / 2, maxCoordenateY / 2))) {
-                    stopMoving();
-                }
             }
         }
-
     }
 
     private void validateCoordenates() {
@@ -184,7 +209,7 @@ public class UFO extends Thread {
         return image;
     }
 
-    public String getImagePath(){
+    public String getImagePath() {
         return imagePath;
     }
 
@@ -228,4 +253,5 @@ public class UFO extends Thread {
                 other.getImage().getWidth(null), other.getImage().getHeight(null));
         return thisBounds.intersects(otherBounds);
     }
+
 }

@@ -10,10 +10,14 @@ import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import co.edu.uptc.interfaces.ModelInterface;
+import co.edu.uptc.interfaces.PresenterInterface;
+import co.edu.uptc.interfaces.ViewInterface;
+import co.edu.uptc.models.MusicGame;
 import co.edu.uptc.models.UFO;
 import co.edu.uptc.views.UFOFrame;
 
-public class UFOApp {
+public class UFOApp implements PresenterInterface{
     private ArrayList<UFO> ufos;
     private UFOFrame ufoView;
     private Timer timer;
@@ -23,15 +27,21 @@ public class UFOApp {
     private String ufoImagePath = "Images/MainOvni.png";
     private int maxUFOs;
     private Point defaultDestination = new Point(100, 100);
+    private MusicGame musicGame;
+    private ViewInterface view;
+    private ModelInterface model;
+    //private int ufosCrashedCount;
 
     public UFOApp() {
         ufos = new ArrayList<>();
-        ufoView = new UFOFrame(ufos, e -> updateUFOs(), e -> updateSpawnTime(), e -> updateSpeed(), e -> selectImage());
+        ufoView = new UFOFrame(ufos, e -> updateUFOS(), e -> updateSpawnTime(), e -> updateSpeed(), e -> selectImage());
         maxUFOs = ufoView.getNumberOfUfos();
+        musicGame = new MusicGame();
 
         spawnTime = 1000;
 
         testImageLoading();
+        musicGame.play("sounds/musicInGame.wav");
 
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -40,6 +50,7 @@ public class UFOApp {
                 ufoView.updateUfos(ufos);
                 removeReachedOrCrashedUFOs();
                 checkCollisions();
+                //updateControlPanel();
             }
         }, 0, 10);
 
@@ -49,7 +60,7 @@ public class UFOApp {
                 synchronized (ufos) {
                     int ufosToSpawn = maxUFOs - ufos.size();
                     for (int i = 0; i < ufosToSpawn && i < 1; i++) {
-                        spawnUfo();
+                        spawnUFO();
                     }
                 }
             }
@@ -57,7 +68,8 @@ public class UFOApp {
         ufoView.setVisible(true);
     }
 
-    private void spawnUfo() {
+    @Override
+    public void spawnUFO() {
         UFO ufo = new UFO(maxCoordenateX, maxCoordenateY, ufoImagePath, -1, -1);
         synchronized (ufos) {
             ufos.add(ufo);
@@ -65,7 +77,8 @@ public class UFOApp {
         ufo.start();
     }
 
-    private void checkCollisions() {
+    @Override
+    public void checkCollisions() {
         synchronized (ufos) {
             for (int i = 0; i < ufos.size(); i++) {
                 UFO ufo1 = ufos.get(i);
@@ -79,6 +92,7 @@ public class UFOApp {
                     if (bounds1.intersects(bounds2)) {
                         ufo1.setCollision(true);
                         ufo2.setCollision(true);
+                        //ufosCrashedCount++;
                         break;
                     }
                 }
@@ -86,10 +100,11 @@ public class UFOApp {
         }
     }
 
-    private void updateUFOs() {
+    @Override
+    public void updateUFOS() {
         int numOfUFOs = ufoView.getNumberOfUfos();
         if (numOfUFOs < 0)
-            return; // Manejo de error
+            return; 
         maxUFOs = numOfUFOs;
         synchronized (ufos) {
             for (UFO ufo : ufos) {
@@ -105,8 +120,10 @@ public class UFOApp {
             while (iterator.hasNext()) {
                 UFO ufo = iterator.next();
                 if (!ufo.isAlive() || ufo.isCrashed() || ufo.hasReachedDefaultDestination(defaultDestination)) {
+                    //ufosCrashedCount++;
                     iterator.remove();
                 }
+                //iterator.remove();
             }
         }
     }
@@ -119,7 +136,7 @@ public class UFOApp {
                 synchronized (ufos) {
                     int ufosToSpawn = maxUFOs - ufos.size();
                     for (int i = 0; i < ufosToSpawn && i < 5; i++) {
-                        spawnUfo();
+                        spawnUFO();
                     }
                 }
             }
@@ -137,7 +154,15 @@ public class UFOApp {
             }
         }
     }
-
+    /* 
+    private void updateControlPanel() {
+        SwingUtilities.invokeLater(() -> {
+            ufoView.setUFOsInScreenCount(ufos.size());
+            ufoView.setUFOsCrashedCount(ufosCrashedCount);
+        });
+        
+    }
+    */
     private void selectImage() {
         String[] ufoImages = { "Images/MainUfo.png", "Images/Ovni1.png", "Images/Ovni2.png" };
 
@@ -169,5 +194,15 @@ public class UFOApp {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(UFOApp::new);
+    }
+
+    @Override
+    public void setView(ViewInterface view) {
+      this.view = ufoView;
+    }
+
+    @Override
+    public void setModel(ModelInterface model) {
+      this.model = model;
     }
 }

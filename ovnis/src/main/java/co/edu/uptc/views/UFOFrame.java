@@ -12,15 +12,19 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+
+import co.edu.uptc.interfaces.PresenterInterface;
+import co.edu.uptc.interfaces.ViewInterface;
 import co.edu.uptc.models.UFO;
 
-public class UFOFrame extends JFrame {
+public class UFOFrame extends JFrame implements ViewInterface{
 
     private UFOPanel ufoPanel;
     private UFO selectedUFO;
     private UFOControlPanel controlPanel;
     private ArrayList<Point> trajectory;
     private ArrayList<UFO> ufos;
+    private PresenterInterface presenter;
 
     public UFOFrame(ArrayList<UFO> ufos, ActionListener updateListener, ActionListener spawListener,
             ActionListener speedListener, ActionListener imagListener) {
@@ -83,6 +87,7 @@ public class UFOFrame extends JFrame {
         setLocationRelativeTo(null);
     }
 
+    @Override
     public void updateUfos(ArrayList<UFO> ufos) {
         this.ufos = ufos;
         repaint();
@@ -115,5 +120,10 @@ public class UFOFrame extends JFrame {
     private void updateView() {
         setUFOsInScreenCount(ufos.size());
         setUFOsCrashedCount(ufos.stream().filter(UFO::isCrashed).mapToInt(UFO -> 1).sum());
+    }
+
+    @Override
+    public void setPresenter(PresenterInterface presenter) {
+        this.presenter = presenter;
     }
 }
